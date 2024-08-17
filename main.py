@@ -1,9 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import StaleElementReferenceException
 import time
 
-from timer import Timer
 
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_experimental_option("detach", True)
@@ -17,41 +15,38 @@ assert "Cookie Clicker" in driver.title
 
 # ------------------ COOKIE ------------------ #
 
-timer = Timer(5, 20)   # sets checking the store @ 5 seconds, and end timer @ 20 seconds
+start_time = time.time()
+end_time = start_time + (5 * 60)
+store_check = time.time()
+
 cookie = driver.find_element(By.CSS_SELECTOR, "#cookie")
 
-while timer.game_is_on(): # while the game start runs from time.time() to just before the end_timer_seconds
 
-    money = int(driver.find_element(By.ID, "money").text)  # keep track of the money
+while True:
+    cookie.click()
+    money = int(driver.find_element(By.ID, "money").text.replace(',', ''))  # keep track of the money
 
-    if timer.game_is_on() is False:  # stops the game if timer is at 20 seconds
-        print(f"Your ending money is: {money}")
-        break
+    if time.time() > store_check + 5:
 
-    cookie.click()  # keep clicking
+        # get the divs that are available, meaning starts with #buy and the class is empty
+        store_divs = driver.find_elements(By.XPATH, "//*[starts-with(@id, 'buy') and @class='']")
+        available_to_click = store_divs[::-1]  # reverse the list of store_divs we found
 
-    timer.counting_down()  # start the countdown
+        # debugger to see items
+        store_items = [item.text for item in available_to_click]
+        print(store_items)
 
-    if timer.is_countdown_zero():  # if the timer running hits 0
         print(money)
 
-        try:
-            for i in range(7, -1, -1):  # this is how many shop items are in the store
-                store_click_div = driver.find_elements(By.CSS_SELECTOR, "#store>div")
-                store_click_div.pop()  # grabs the div you can click but removes the empty one
+        if available_to_click:
+            available_to_click[0].click()
 
-                store_items = driver.find_elements(By.CSS_SELECTOR, "#store>div>b")  # grabs the cost of the store items
-                store = [int(item.text.split()[-1].replace(',', '')) for item in store_items if item.text.split()]
+        store_check = time.time()
 
-                if money >= store[i]:
-                    store_click_div[i].click()
-
-        except StaleElementReferenceException:
-            print("Encountered stale element. Continue checking store...")
-
-        timer.reset_timer()
-
-
+    if time.time() >= end_time:
+        print(f"Your ending money is: {money}")
+        print(f"Your cookies per second rate is: {driver.find_element(By.ID, "cps").text}")
+        break
 
 time.sleep(2)
 driver.quit()
