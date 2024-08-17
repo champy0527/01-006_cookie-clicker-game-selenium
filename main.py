@@ -20,11 +20,11 @@ assert "Cookie Clicker" in driver.title
 timer = Timer(5, 20)   # sets checking the store @ 5 seconds, and end timer @ 20 seconds
 cookie = driver.find_element(By.CSS_SELECTOR, "#cookie")
 
-while timer.is_game_on(): # while the game start runs from time.time() to just before the end_timer_seconds
+while timer.game_is_on(): # while the game start runs from time.time() to just before the end_timer_seconds
 
     money = int(driver.find_element(By.ID, "money").text)  # keep track of the money
 
-    if timer.is_game_on() is False:  # stops the game if timer is at 20 seconds
+    if timer.game_is_on() is False:  # stops the game if timer is at 20 seconds
         print(f"Your ending money is: {money}")
         break
 

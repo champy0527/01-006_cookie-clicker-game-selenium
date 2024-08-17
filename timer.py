@@ -21,6 +21,6 @@ class Timer:
     def reset_timer(self):
         self.start_time = None
 
-    def is_game_on(self):
+    def game_is_on(self):
         running_time = time.time() - self.game_start_time
         return running_time < self.end_timer_seconds
